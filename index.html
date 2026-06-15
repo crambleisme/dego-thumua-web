@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEGO Thu Mua — Nhập liệu</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Identity Services (Sign in with Google) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <!-- Thanh loading mảnh trên cùng (tự hiện khi có request) -->
+  <div id="loadbar" class="loadbar hidden"></div>
+
+  <!-- ===== Thanh trên cùng ===== -->
+  <header id="topbar">
+    <div class="brand">🟢 DEGO Thu Mua</div>
+    <div id="userbox" class="userbox hidden">
+      <span id="userInfo"></span>
+      <button id="btnLogout" class="btn btn-ghost">Đăng xuất</button>
+    </div>
+  </header>
+
+  <!-- ===== Màn đăng nhập ===== -->
+  <section id="loginScreen" class="center">
+    <div class="card login-card">
+      <h2>Đăng nhập</h2>
+      <p class="muted">Dùng tài khoản Google đã được cấp quyền để vào hệ thống.</p>
+      <div id="gbtn"></div>
+      <p id="loginNote" class="muted small"></p>
+    </div>
+  </section>
+
+  <!-- ===== Ứng dụng chính (ẩn cho tới khi đăng nhập) ===== -->
+  <main id="app" class="hidden">
+    <nav id="nav"></nav>
+    <section id="content"></section>
+  </main>
+
+  <!-- ===== Hộp thoại form (modal) ===== -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="modalTitle">Form</h3>
+        <button id="modalClose" class="btn btn-ghost">✕</button>
+      </div>
+      <form id="dynForm" class="dyn-form"></form>
+      <div class="modal-foot">
+        <button id="btnSave" class="btn btn-primary">Lưu</button>
+        <span id="formMsg" class="form-msg"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
