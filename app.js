@@ -56,7 +56,8 @@ function spinner() { return el('div', { class: 'spinner' }); }
 // ===== Định dạng hiển thị (ngày dd/mm/yyyy, số có dấu chấm phân cách nghìn) =====
 const COT_TIEN = new Set(['so_tien', 'don_gia', 'thanh_tien', 'gia', 'gia_de_xuat', 'dau_ky',
   'ps_tang', 'ps_giam', 'cuoi_ky_misa', 'cuoi_ky_bb_ncc', 'nk_gia_usd', 'nk_gia_von',
-  'moq', 'sl_yeu_cau', 'sl_dat_ncc', 'sl_nhan', 'so_luong_ton', 'gia_tam_tinh']);
+  'moq', 'sl_yeu_cau', 'sl_dat_ncc', 'sl_nhan', 'so_luong_ton', 'gia_tam_tinh',
+  'don_gia_vc', 'thanh_tien_vc', 'sl_gui_vc']);
 const COT_NGAY = new Set(['ngay', 'ngay_tiep_nhan', 'ngay_yc_tra_kq', 'ngay_lien_he', 'ngay_bao_gia',
   'ngay_tra_kq', 'ngay_dat_ncc', 'ngay_yeu_cau', 'ngay_dk_nhan', 'ngay_nhan_tt', 'ngay_phat_sinh',
   'deadline', 'ngay_bat_dau', 'ngay_ket_thuc', 'ngay_lay_mau', 'nk_ngay_dk_thong_quan', 'nk_ngay_tt_thong_quan', 'ngay_dat']);
@@ -321,6 +322,9 @@ async function viewDonMua() {
   c.appendChild(box);
   const holder = el('div'); c.appendChild(holder);
   holder.appendChild(spinner());
+
+  // Nạp sẵn danh sách yêu cầu cho dropdown "Phiếu yêu cầu nguồn" trong form tạo đơn.
+  if (!CACHE_YEUCAU) { try { CACHE_YEUCAU = await Api.list('DL_YEUCAU', {}); } catch (e) { CACHE_YEUCAU = []; } }
 
   try {
     CACHE_DONMUA = await Api.list('DL_DONMUA', {});
