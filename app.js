@@ -56,10 +56,10 @@ function spinner() { return el('div', { class: 'spinner' }); }
 // ===== Định dạng hiển thị (ngày dd/mm/yyyy, số có dấu chấm phân cách nghìn) =====
 const COT_TIEN = new Set(['so_tien', 'don_gia', 'thanh_tien', 'gia', 'gia_de_xuat', 'dau_ky',
   'ps_tang', 'ps_giam', 'cuoi_ky_misa', 'cuoi_ky_bb_ncc', 'nk_gia_usd', 'nk_gia_von',
-  'moq', 'sl_yeu_cau', 'sl_dat_ncc', 'sl_nhan']);
+  'moq', 'sl_yeu_cau', 'sl_dat_ncc', 'sl_nhan', 'so_luong_ton', 'gia_tam_tinh']);
 const COT_NGAY = new Set(['ngay', 'ngay_tiep_nhan', 'ngay_yc_tra_kq', 'ngay_lien_he', 'ngay_bao_gia',
   'ngay_tra_kq', 'ngay_dat_ncc', 'ngay_yeu_cau', 'ngay_dk_nhan', 'ngay_nhan_tt', 'ngay_phat_sinh',
-  'deadline', 'ngay_bat_dau', 'ngay_ket_thuc', 'ngay_lay_mau', 'nk_ngay_dk_thong_quan', 'nk_ngay_tt_thong_quan']);
+  'deadline', 'ngay_bat_dau', 'ngay_ket_thuc', 'ngay_lay_mau', 'nk_ngay_dk_thong_quan', 'nk_ngay_tt_thong_quan', 'ngay_dat']);
 function fmtNgay(v) {
   const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
   return m ? (m[3] + '/' + m[2] + '/' + m[1]) : String(v);
@@ -117,6 +117,10 @@ function dungMenu() {
       { id: 'chi', label: '💵 Chi NCC' },
       { id: 'congno', label: '📒 Công nợ' }
     ] },
+    { ten: 'Kho / VTBB', items: [
+      { id: 'tonkho', label: '📦 Tồn kho' },
+      { id: 'dutru', label: '📝 Dự trù' }
+    ] },
     { ten: 'Khác', items: [
       { id: 'suco', label: '⚠️ Sự cố' },
       { id: 'hopdong', label: '📄 Hợp đồng' },
@@ -149,8 +153,40 @@ const VIEW_FN = {
   hopdong: () => viewBangEntity('DL_HOPDONG', ['ma_hd', 'so_ky_hieu', 'ma_ncc', 'phan_loai', 'ngay_ket_thuc', 'nspt'], 'Hợp đồng NCC'),
   dieuphoi: () => viewBangEntity('DL_DIEUPHOI', ['ma_dp', 'ngay', 'khach_hang', 'ncc_thuc_te', 'trang_thai'], 'Điều phối đơn hàng'),
   dashboard: () => viewDashboard(),
-  nguoidung: () => viewUsers()
+  nguoidung: () => viewUsers(),
+  tonkho: () => viewBangLoc('DL_TONKHO',
+    ['nha_may', 'phan_loai', 'ma_vtbb', 'ten_vtbb', 'so_luong_ton', 'gia_tam_tinh', 'ky'], 'Tồn kho VTBB'),
+  dutru: () => viewBangLoc('DL_DUTRU',
+    ['ma_don_dutru', 'ngay_dat', 'ncc', 'kho_nhan', 'ma_vtbb', 'ten_vtbb', 'muc_dich', 'tien_do'], 'Dự trù VTBB', { them: true })
 };
+
+// Màn danh sách CÓ Ô LỌC (cho bảng nhiều dòng: tồn kho, dự trù).
+async function viewBangLoc(tab, cols, tieu, opts) {
+  opts = opts || {};
+  const c = document.getElementById('content');
+  c.innerHTML = '';
+  c.appendChild(thanhTieuDe(tieu, opts.them ? '+ Thêm' : null, opts.them ? () => formEntity(tab, null, opts) : null));
+  const box = el('input', { class: 'inp', placeholder: 'Lọc theo mã / tên / NCC…' });
+  box.style.maxWidth = '340px'; box.style.marginBottom = '12px';
+  c.appendChild(box);
+  const holder = el('div'); c.appendChild(holder); holder.appendChild(spinner());
+  let all = [];
+  try { all = await Api.list(tab, {}); }
+  catch (e) { holder.innerHTML = ''; holder.appendChild(el('p', { class: 'err' }, [e.message])); return; }
+  function render(rows) {
+    holder.innerHTML = '';
+    holder.appendChild(el('div', { class: 'muted small' }, [rows.length + ' dòng']));
+    holder.appendChild(bangDuLieu(rows.slice(0, 300), cols,
+      opts.them ? (r) => el('button', { class: 'btn btn-sm', onclick: () => formEntity(tab, r, opts) }, ['Sửa']) : null));
+    if (rows.length > 300) holder.appendChild(el('p', { class: 'muted small' },
+      ['Hiển thị 300/' + rows.length + ' — gõ ô lọc để thu hẹp.']));
+  }
+  render(all);
+  box.addEventListener('input', () => {
+    const q = box.value.toLowerCase().trim();
+    render(!q ? all : all.filter(r => cols.some(c => String(r[c] || '').toLowerCase().includes(q))));
+  });
+}
 
 // ===== Module QUẢN LÝ NGƯỜI DÙNG (QLTM/Admin) — cấp/sửa/khoá/xoá quyền =====
 const USER_FIELDS = [
@@ -542,7 +578,10 @@ function nhanCot(ma) {
     ma_su_co: 'Mã sự cố', ngay_phat_sinh: 'Ngày phát sinh', phan_loai_loi: 'Loại lỗi', muc_do: 'Mức độ',
     ma_hd: 'Mã HĐ', so_ky_hieu: 'Số ký hiệu', ngay_ket_thuc: 'Hết hạn',
     ma_dp: 'Mã ĐP', khach_hang: 'Khách hàng', ncc_thuc_te: 'NCC thực tế',
-    lan_nhan: 'Lần nhận', ngay_nhan_tt: 'Ngày nhận', sl_nhan: 'SL nhận', so_hoa_don: 'Số HĐ'
+    lan_nhan: 'Lần nhận', ngay_nhan_tt: 'Ngày nhận', sl_nhan: 'SL nhận', so_hoa_don: 'Số HĐ',
+    nha_may: 'Nhà máy/Kho', ma_vtbb: 'Mã VTBB', ten_vtbb: 'Tên VTBB', so_luong_ton: 'SL tồn',
+    gia_tam_tinh: 'Giá tạm tính', ky: 'Kỳ', ma_don_dutru: 'Mã dự trù', ngay_dat: 'Ngày đặt',
+    ncc: 'NCC', muc_dich: 'Mục đích', tien_do: 'Tiến độ'
   };
   return m[ma] || ma;
 }
