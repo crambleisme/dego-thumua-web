@@ -127,6 +127,9 @@ function dungMenu() {
       { id: 'suco', label: '⚠️ Sự cố' },
       { id: 'hopdong', label: '📄 Hợp đồng' },
       { id: 'dieuphoi', label: '🔀 Điều phối' }
+    ] },
+    { ten: 'Trợ giúp', items: [
+      { id: 'hdsd', label: '📖 Hướng dẫn' }
     ] }
   ];
   if (qltm) groups.push({ ten: 'Quản lý', items: [
@@ -156,6 +159,7 @@ const VIEW_FN = {
   dieuphoi: () => viewBangEntity('DL_DIEUPHOI', ['ma_dp', 'ngay', 'khach_hang', 'ncc_thuc_te', 'trang_thai'], 'Điều phối đơn hàng'),
   dashboard: () => viewDashboard(),
   nguoidung: () => viewUsers(),
+  hdsd: () => { if (window.HDSDView) HDSDView.render(); },
   tonkho: () => viewBangLoc('DL_TONKHO',
     ['nha_may', 'phan_loai', 'ma_vtbb', 'ten_vtbb', 'so_luong_ton', 'gia_tam_tinh', 'ky'], 'Tồn kho VTBB'),
   dutru: () => viewBangLoc('DL_DUTRU',
