@@ -95,7 +95,8 @@ async function sauDangNhap() {
       BOOT.user.ho_ten + ' · ' + BOOT.user.vai_tro + (BOOT.user.nspt_code ? ' (' + BOOT.user.nspt_code + ')' : '');
     dungMenu();
     moView('yeucau');
-    if (window.Widget) Widget.onLogin(); // bật widget hỗ trợ (góc phải dưới)
+    // LƯU Ý: Widget khai bằng `const` nên KHÔNG nằm trên window — tham chiếu trực tiếp.
+    if (typeof Widget !== 'undefined') Widget.onLogin(); // bật widget hỗ trợ (góc phải dưới)
   } catch (e) {
     toast(e.message, true);
     document.getElementById('loginNote').textContent = 'Lỗi: ' + e.message;
